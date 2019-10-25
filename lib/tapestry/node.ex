@@ -1,7 +1,8 @@
 require Logger
-
 defmodule Tapestry.Node do
   use GenServer
+
+  @delay Application.get_env(:tapestry, :delay_between_reqs)
 
   def start_link(_state) do
     # Set initial state to an empty Map
@@ -78,7 +79,7 @@ defmodule Tapestry.Node do
 
   defp schedule_next_send(remaining_requests, callback_pid) do
     if length(remaining_requests) >= 1 do
-      Process.send_after(self(), {:make_requests, remaining_requests, callback_pid}, 1_000)
+      Process.send_after(self(), {:make_requests, remaining_requests, callback_pid}, @delay)
     end
   end
 end
