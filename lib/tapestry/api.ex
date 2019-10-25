@@ -1,3 +1,5 @@
+require Logger
+
 defmodule Tapestry.API do
   def run_simulation(num_nodes, num_requests) do
     pids = Tapestry.Core.create_nodes(num_nodes)
@@ -52,6 +54,15 @@ defmodule Tapestry.API do
       #   |> Enum.take_random(num_requests)
 
       other_hashes = Enum.filter(hash_list, fn to_hash -> to_hash != from_hash end)
+
+      # If `num_nodes` == 1, `other_hashes` is empty
+      # `Enum.random(other_hashes)` will raise an Enum.EmptyError error
+
+      if length(other_hashes) == 0 do
+        Logger.error "Cannot run requests with only one node in the network"
+        exit :shutdown
+      end
+
       requests_to_make = Enum.reduce(1..num_requests, [], fn _, res ->
         [Enum.random(other_hashes)] ++ res
       end)
