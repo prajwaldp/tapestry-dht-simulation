@@ -1,3 +1,5 @@
+require Logger
+
 defmodule Tapestry.Node do
   use GenServer
 
@@ -44,7 +46,7 @@ defmodule Tapestry.Node do
   @impl true
   def handle_cast({:receive_request, destination, hop_count, path, callback_pid}, state) do
     if state[:hash] == destination do
-      # IO.puts "Done in #{hop_count} hop(s), path = #{path} -> #{state[:hash]}"
+      Logger.debug "Done in #{hop_count} hop(s), path = #{path} -> #{state[:hash]}"
       send(callback_pid, {:done, hop_count})
     else
       forward_address_key = Tapestry.Routing.get_route_to(destination, state[:hash])
@@ -57,7 +59,7 @@ defmodule Tapestry.Node do
         GenServer.cast(forward_address,
           {:receive_request, destination, hop_count + 1, path, callback_pid})
       else
-        IO.puts "Oops! #{inspect forward_address_key} not in routing table of #{inspect self()}\nState: #{inspect state}"
+        Logger.error "Oops! #{inspect forward_address_key} not in routing table of #{inspect self()}\nState: #{inspect state}"
       end
     end
     
