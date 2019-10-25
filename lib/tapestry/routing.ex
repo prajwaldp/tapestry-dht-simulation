@@ -38,11 +38,11 @@ defmodule Tapestry.Routing do
           existing_route = Map.get(routing_table, {column, matching_row})
           hash_for_existing_route = Tapestry.Routing.encode_pid(existing_route)
 
-          old_dist = String.to_integer(hash_for_existing_route, 16) -
-            String.to_integer(hash, 16)
+          old_dist = abs(String.to_integer(hash_for_existing_route, 16) -
+            String.to_integer(hash, 16))
 
-          new_dist = String.to_integer(other_hash, 16) -
-            String.to_integer(hash, 16)
+          new_dist = abs(String.to_integer(other_hash, 16) -
+            String.to_integer(hash, 16))
 
           if new_dist < old_dist do
             Map.put(routing_table, {column, matching_row}, other_pid)
