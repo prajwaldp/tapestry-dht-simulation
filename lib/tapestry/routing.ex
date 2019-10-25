@@ -26,12 +26,32 @@ defmodule Tapestry.Routing do
       fn {other_pid, other_hash}, routing_table ->
 
       if other_pid != pid do
-        {column, matching_prefix} = get_route_to(other_hash, hash)
+        {column, matching_row} = get_route_to(other_hash, hash)
 
-        if Map.has_key?(routing_table, {column, matching_prefix}) do
-          routing_table
+        if Map.has_key?(routing_table, {column, matching_row}) do
+
+          # If the routing table of this node contains a route for this match,
+          # the route is updated with the route to the node that is closer
+          # to this node
+
+          # `existing_route` is a pid
+          existing_route = Map.get(routing_table, {column, matching_row})
+          hash_for_existing_route = Tapestry.Routing.encode_pid(existing_route)
+
+          old_dist = String.to_integer(hash_for_existing_route, 16) -
+            String.to_integer(hash, 16)
+
+          new_dist = String.to_integer(other_hash, 16) -
+            String.to_integer(hash, 16)
+
+          if new_dist < old_dist do
+            Map.put(routing_table, {column, matching_row}, other_pid)
+          else
+            routing_table
+          end
+        
         else
-          Map.put(routing_table, {column, matching_prefix}, other_pid)
+          Map.put(routing_table, {column, matching_row}, other_pid)
         end
       else
         # if other_pid == pid
