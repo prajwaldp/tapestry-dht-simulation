@@ -1,6 +1,14 @@
 require Logger
 
 defmodule Tapestry.API do
+  @moduledoc """
+  Contains the functions that are intended to be called by the user
+  from an external viewpoint
+  """
+  
+  @doc """
+  Starts the simulation with `num_nodes` each sending `num_requests`
+  """
   def run_simulation(num_nodes, num_requests) do
     pids = Tapestry.Core.create_nodes(num_nodes)
 
@@ -72,8 +80,9 @@ defmodule Tapestry.API do
 
     wait_for_all_requests_to_complete(num_nodes * num_requests, 0)
   end
-
-  def wait_for_all_requests_to_complete(num_requests, max_hop_count) do
+  
+  # Returns and prints the `max_hop_count` when `num_requests` are completed.
+  defp wait_for_all_requests_to_complete(num_requests, max_hop_count) do
     if num_requests > 0 do
       receive do
         {:done, hop_count} ->

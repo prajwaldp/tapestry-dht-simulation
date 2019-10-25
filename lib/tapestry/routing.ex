@@ -1,6 +1,15 @@
 defmodule Tapestry.Routing do
+  @moduledoc """
+  Contains functions for building the routing tables for processes,
+  for encoding processes to hashes and for finding the route from
+  one hash to another hash.
+  """
+
   @doc """
   Build the routing table for a list of PIDs
+
+  Returns a tuple, the first element is a Map of PIDs to their encoded hashes
+  and the second element is a Map of PIDs to their routing table.
   """
   def build_routing_tables(pids) do
 
@@ -20,6 +29,8 @@ defmodule Tapestry.Routing do
 
   @doc """
   Build the routing table of an individual PID
+
+  Returns a map that represents the routing table.
   """
   def build_routing_table(pid, hash, pid_hash_map) do
     Enum.reduce(pid_hash_map, %{},
@@ -61,11 +72,19 @@ defmodule Tapestry.Routing do
     end)
   end
 
+  @doc """
+  Encodes the process as a 40 digit hexadecimal string using the
+  SHA1 hashing algorithm
+  """
   def encode_pid(pid) do
     # Convert the PID to a 160 bit hash and encode it in Base16
     :crypto.hash(:sha, inspect(pid)) |> Base.encode16
   end
 
+  @doc """
+  Returns a tuple with the matching index and the column
+  between to the two hashes.
+  """
   def get_route_to(to_hash, from_hash) do
   
     # Both hashes are of the same length  

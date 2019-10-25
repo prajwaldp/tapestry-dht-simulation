@@ -1,5 +1,12 @@
 require Logger
+
 defmodule Tapestry.Node do
+  @moduledoc """
+  Each node is simulated as GenServer. This module implements the callbacks
+  for reading and setting the state, modifying the routing table and for
+  receiving from and making requests to other nodes.
+  """
+  
   use GenServer
 
   @delay Application.get_env(:tapestry, :delay_between_reqs)
@@ -27,6 +34,9 @@ defmodule Tapestry.Node do
   end
 
   @impl true
+  @doc """
+  Adds a new pid-hash pair to the routing table
+  """
   def handle_call({:add_to_routing_table, hash, pid}, _from, state) do
     current_routing_table = state[:routing_table]
     {column, matching_prefix} = Tapestry.Routing.get_route_to(hash, state[:hash])
@@ -45,6 +55,9 @@ defmodule Tapestry.Node do
   end
 
   @impl true
+  @doc """
+  Receive a message (a request) from another node for a hash
+  """
   def handle_cast({:receive_request, destination, hop_count, path, callback_pid}, state) do
     if state[:hash] == destination do
       Logger.debug "Done in #{hop_count} hop(s), path = #{path} -> #{state[:hash]}"
@@ -68,6 +81,10 @@ defmodule Tapestry.Node do
   end
 
   @impl true
+  @doc """
+  Start making requests to all the destinations in `requests` with a time delay
+  using the helper function `schedule_next_send`
+  """
   def handle_info({:make_requests, requests, callback_pid}, state) do
     [request | remaining_requests] = requests
 
