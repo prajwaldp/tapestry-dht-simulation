@@ -12,19 +12,24 @@ having their routing tables initialized).
 Run the project as:
 
 ```
-$ mix run tapestry.exs <num_nodes> <num_requests>
+$ mix run tapestry.exs [num_nodes] [num_requests]
 ```
 
-`num_nodes` is the number of nodes in the network.
+- **`num_nodes` is the number of nodes in the network.**
+
 - Initially, a network with `num_nodes - 1` nodes is created and their routing tables
 are populated.
+
 - Then, another node is added to the network. This introduces modifications
 to the routing tables of the older nodes in the network.
 
-`num_requests` is the number of requests each node makes. These requests are to other
-random nodes in the network and are sent after a time delay. The time delay is set
-in the key `:delay_between_reqs` of the `:tapestry` application in `config/config.exs`.
-The **default** time delay between requests from a node is **1000 ms**. The runtime of
+- **`num_requests` is the number of requests each node makes.**
+
+- These requests are to other random nodes in the network and are sent after a time delay.
+The time delay is set in the key `:delay_between_reqs` of the `:tapestry` application
+in `config/config.exs`.
+
+- The **default** time delay between requests from a node is **1000 ms**. The runtime of
 the program for larger number of requests can be reduced by reducing this value.
 
 To see a detailed explanation, the log level can be set to `:debug` in `config/config.exs`.
@@ -50,32 +55,48 @@ $ mix run tapestry.exs 20 2
 All requests completed. Max hops needed = 2
 ```
 
-# Description
-The project is an implementation of *Tapestry: A Resilient Global-Scale Overlay for Service Deployment by Ben Y. Zhao, Ling Huang, Jeremy Stribling, Sean C. Rhea, Anthony D. Joseph and John D. Kubiatowicz*.
+## Description
+The project is an implementation of *Tapestry: A Resilient Global-Scale
+Overlay for Service Deployment by Ben Y. Zhao, Ling Huang, Jeremy Stribling,
+Sean C. Rhea, Anthony D. Joseph and John D. Kubiatowicz*.
 
 The implementation consists of the following parts:
 
 ### Network Creation
 
-In this phase, the routing table for all the nodes is created and set in each of the nodes’ state. Each routing table consists of levels as their rows. These levels are created based on how many digits match between the source node and destination node hashes. As an example, If the first three digits match, then they are placed in the third level of the routing table. The column position is decided according to the first digit mismatch. So, in the above example, the fourth digit will be deciding the column number in the third level. If there is a conflict between two entries for a cell then based on the nearest neighbour logic the node is selected. Nearest neighbour logic works by comparing hashes of each node with source node, and selecting the hash with lesser value as its neighbour. Once all the routing tables are built then the network is considered to be stable.
+- The routing table for all the nodes is created and set in each of the nodes’ state.
+- The routing table is based on prefix address matching.
 
-### Dynamic Node Insertion Algorithm
+### Dynamic Node Insertion
 
-In our implementation, 1 node is inserted into the network after the network is initialized (all the nodes have built their routing tables) and has become stable. For node insertion following steps are performed:
+In the simulation, 1 node is inserted into the network after the
+network is initialized (all the nodes have built their routing tables)
+and has become stable. For node insertion following steps are performed:
 
 1. A new node is initialised.
 2. Routing table for the new node is built.
-3. A multicast call is sent out for all the nearby nodes to make an edit in their routing table. In each routing table, the new node should be entered at a particular cell based on prefix matching and first digit mismatch logic. Once the cell is known, then an entry of the new node is made only if the cell is empty. If the cell is not empty then the entry already present is replaced with the new node based on the nearest neighbour logic.
+3. A multicast call is sent out for all the nearby nodes to make an edit in their routing table.
+In each routing table, the new node should be entered at a particular cell based on prefix matching
+and first digit mismatch logic. Once the cell is known, then an entry of the new node is made
+only if the cell is empty. If the cell is not empty then the entry already present is replaced
+with the new node based on the nearest neighbour logic.
 
 ### Message Routing To Node
 
-For each node, a destination is selected at random and the message passing is started from the source. The source lookups for the destination in its routing table. If the destination is found then the message is received by destination in one hop. If the destination is not present in the routing table then based on prefix matching a node is selected from the source’s routing table and the message is sent to the selected node. The selected node looks for the destination in its own routing table and the same process continues until destination is reached. With each new node hop count is increased by one.
+- For each node, a destination is selected at random and the message passing is started from the source.
+- The source lookups for the destination in its routing table. If the destination
+is found then the message is received by destination in one hop. 
+- If the destination is not present in the routing table then based on prefix
+matching, a node is selected from the source’s routing table and the message is sent to the selected node.
+- The selected node looks for the destination in its own routing table
+and the same process continues until destination is reached.
+- With each new node hop count is increased by one.
 
-### Output
+### Metric
 
-Output is the maximum number of hops it took to reach from source to destination.
+The metric of interest is the maximum number of hops it took to reach from source to destination.
 
-# Result
+## Result
 
 | # Nodes | # Requests (from each node) | Maximum Hops |
 | ------- | --------------------------- | ------------ |
