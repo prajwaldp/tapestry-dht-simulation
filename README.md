@@ -7,26 +7,12 @@ for distributed hash tables:
 * Addition of a new node into an initialized network (with all the nodes
 having their routing tables initialized).
 
-## Team Members
-- Prajwal Dondiganahalli Prakash (UFID 04464906)
-- Rishabh Khanna (UFID 13399251)
-
-## What works
-
-- Creating network as per the input
-- Generating the routing table for each node
-- Dynamically inserting a node into a network
-- Passing message requests from the source node to the destination node
-
-## Largest network we managed to deal with
-- 12000 nodes
-
 ## Instructions
 
 Run the project as:
 
 ```
-$ mix run project3.exs <num_nodes> <num_requests>
+$ mix run tapestry.exs <num_nodes> <num_requests>
 ```
 
 `num_nodes` is the number of nodes in the network.
@@ -48,7 +34,7 @@ the destination is printed.
 For example (with the log level set to debug - `config :logger, level: :debug` in `config/config.exs`)
 
 ```
-$ mix run project3.exs 20 2
+$ mix run tapestry.exs 20 2
 
 13:32:59.664 [debug] Done in 1 hop(s), path = 2DA1E257A1DD524E9EB75C522FF74F521BCFEC47 -> D3978C883E77D19C5C34766C3E29EA1BF2CD0A58
 
